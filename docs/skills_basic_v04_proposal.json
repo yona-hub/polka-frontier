@@ -1,0 +1,1212 @@
+{
+  "version": "0.4.0",
+  "date": "2026-11-20",
+  "status": "基本職24スキル 改訂案（操作間隔・MP・連携効果は仮値）",
+  "release_scope": "初回リリースの基本職4タイプ×6スキル。タイプ内の2キャラは共有し、一次転職後も習得・Lv・M・登録資格を完全継承。二次職は初回未実装。",
+  "level_scale": {
+    "level1": 0.6,
+    "level10": 1.0,
+    "linear_interpolation": true,
+    "master": 1.1,
+    "effect_time_scales": false,
+    "cooldown_scales": false,
+    "mp_rounding": "ceil(mpAt10 * multiplier), minimum 1"
+  },
+  "tm_cost_category": {
+    "support": {
+      "learn": 1,
+      "level2to10": 9,
+      "master": 2
+    },
+    "attack": {
+      "learn": 2,
+      "level2to10": 9,
+      "master": 3
+    },
+    "finisher": {
+      "learn": 3,
+      "level2to10": 9,
+      "master": 4
+    }
+  },
+  "master_requirements": "Lv10, unlockTM+20, material, master TM points",
+  "combat_rules": {
+    "rng_multiplier_min": 0.98,
+    "rng_multiplier_max": 1.02,
+    "weak_critical_multiplier": 1.45,
+    "strong_critical_multiplier": 1.8,
+    "crit_target_endgame": {
+      "critical_or_strong": 0.95,
+      "strong": 0.6
+    },
+    "hit_block_per_activation": true,
+    "crit_and_variance_per_hit": true,
+    "defense_application": "once per skill target before splitting among hits",
+    "status_consumption": "条件付き攻撃が対象に命中した場合にのみ連携状態を1つ消費。MISS/BLOCKでは消費しない。",
+    "boss_debuff_magnitude_multiplier": 0.5,
+    "buff_stacking": "same effect group strongest applies",
+    "skill_attack_speed_scaled_by_AS": false,
+    "damage_variance": "ヒットごとに0.98〜1.02倍の一様乱数。会心倍率は弱1.45、強1.80（試験案）。",
+    "cooldown_timing": "CTはサーバーが発動を受理した時点から開始。各スキルが独立CTを持つ。",
+    "action_lock_timing": "行動時間には詠唱・攻撃モーション・後隙を含む。終了まで次のスキル発動不可。CTと行動時間は加算せず並行進行。",
+    "recast_period": "同一スキルの最短再発動間隔は max(CT,行動時間)。別スキルへ切替時は現在行動の終了後に発動可能（対象有効・MP足りる前提）。",
+    "input_buffer_seconds": 0.15,
+    "skill_queue": "行動時間の最後0.15秒に1入力だけ予約。古い予約は上書き。入力連打で重複発動しない。",
+    "auto_repeat": "任意設定として主力単体攻撃のみ長押し連発可。対象が死亡・射程外・MP不足なら停止。HP消費技と設置技は自動連打不可。",
+    "multi_hit": "基本攻撃1発動で命中・ブロックを一度判定。防御・属性を計算後に総威力を段数に配分し、各段の弱/強クリ・±2%乱数のみ独立判定。",
+    "cooldown_on_miss": "攻撃がMISSやBLOCKになってもCTとMPは消費。失敗した発動を無償でやり直さない。",
+    "attack_speed": "ASは通常攻撃の速度に使用し、スキルCT・行動時間は原則短縮しない。",
+    "buff_recast": "90秒バフは1回の使用後、敵ごとの掛け直し不要。死亡・解除条件は別仕様で定義。",
+    "single_target_hit_timing": "弾速や罠の遅延がある場合は命中時点で防御側を参照。発動時点で攻撃側能力をスナップショット。"
+  },
+  "type_names": {
+    "attack": "攻撃",
+    "magic": "魔法",
+    "sense": "感覚",
+    "charm": "魅力"
+  },
+  "skills": [
+    {
+      "id": "B_ATK_01",
+      "type": "attack",
+      "name": "ツインブリッツ",
+      "required_tm_level": 1,
+      "prerequisite": [],
+      "tm_point_category": "attack",
+      "level10_effect": "2ヒット合計 1.75×AP",
+      "mp_cost_at_level10": 8,
+      "cooldown_seconds": 1.0,
+      "action_lock_seconds": 0.75,
+      "range_meters": 1.5,
+      "hit_count": 2,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0.5,
+      "notes": "総ダメージを防御計算後2段に分割。武器属性は属性追加分の50%を継承。各段の会心・乱数を独立判定。",
+      "tags": [
+        "damage",
+        "multi_hit"
+      ],
+      "combat_role": "main",
+      "multi_hit_weights": [
+        0.5,
+        0.5
+      ],
+      "repeat_input_allowed": true
+    },
+    {
+      "id": "B_ATK_02",
+      "type": "attack",
+      "name": "ヘヴィインパクト",
+      "required_tm_level": 1,
+      "prerequisite": [],
+      "tm_point_category": "attack",
+      "level10_effect": "単発 2.65×AP",
+      "mp_cost_at_level10": 15,
+      "cooldown_seconds": 2.7,
+      "action_lock_seconds": 0.95,
+      "range_meters": 1.5,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "攻撃型の強めの第二技。長押し連発対象外。武器属性は継承しない。",
+      "tags": [
+        "damage",
+        "single",
+        "secondary_attack"
+      ],
+      "combat_role": "secondary",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_ATK_03",
+      "type": "attack",
+      "name": "スピリットリフト",
+      "required_tm_level": 10,
+      "prerequisite": [
+        [
+          [
+            "B_ATK_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_ATK_02",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "AP＋12%",
+      "mp_cost_at_level10": 12,
+      "cooldown_seconds": 10.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 0,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 90,
+      "weapon_element_share": 0,
+      "notes": "自己バフ90秒。CTが短くても効果中の自動更新は不要。",
+      "tags": [
+        "buff"
+      ],
+      "combat_role": "buff",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_ATK_04",
+      "type": "attack",
+      "name": "エイムシンク",
+      "required_tm_level": 15,
+      "prerequisite": [
+        [
+          [
+            "B_ATK_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_ATK_02",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "AC＋5、LK＋4",
+      "mp_cost_at_level10": 12,
+      "cooldown_seconds": 10.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 0,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 90,
+      "weapon_element_share": 0,
+      "notes": "自己バフ90秒。狩り場と装備に応じて採用。",
+      "tags": [
+        "buff"
+      ],
+      "combat_role": "buff",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_ATK_05",
+      "type": "attack",
+      "name": "メルトアーマー",
+      "required_tm_level": 25,
+      "prerequisite": [
+        [
+          [
+            "B_ATK_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_ATK_02",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "1.20×AP＋敵DP−20%",
+      "mp_cost_at_level10": 13,
+      "cooldown_seconds": 7.0,
+      "action_lock_seconds": 0.72,
+      "range_meters": 1.5,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 8,
+      "weapon_element_share": 0,
+      "notes": "攻撃命中で防御低下8秒。ボスはDP低下量半減。重複せず効果時間更新。",
+      "tags": [
+        "damage",
+        "debuff",
+        "status:MELT_ARMOR"
+      ],
+      "combat_role": "setup",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_ATK_06",
+      "type": "attack",
+      "name": "メルトブレイカー",
+      "required_tm_level": 40,
+      "prerequisite": [
+        [
+          [
+            "B_ATK_05",
+            3
+          ],
+          [
+            "B_ATK_01",
+            5
+          ]
+        ],
+        [
+          [
+            "B_ATK_05",
+            3
+          ],
+          [
+            "B_ATK_02",
+            5
+          ]
+        ]
+      ],
+      "tm_point_category": "finisher",
+      "level10_effect": "通常2.40×AP／メルト状態3.55×AP",
+      "mp_cost_at_level10": 19,
+      "cooldown_seconds": 2.8,
+      "action_lock_seconds": 0.95,
+      "range_meters": 1.5,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "メルトアーマーで付与した状態を攻撃命中時のみ消費。通常状態はヘヴィインパクトより弱い。",
+      "tags": [
+        "damage",
+        "combo",
+        "consume:MELT_ARMOR",
+        "conditional_secondary_attack"
+      ],
+      "combat_role": "conditional_secondary",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_MAG_01",
+      "type": "magic",
+      "name": "ルーンスパーク",
+      "required_tm_level": 1,
+      "prerequisite": [],
+      "tm_point_category": "attack",
+      "level10_effect": "単体2.20×N_MA の無属性魔法",
+      "mp_cost_at_level10": 9,
+      "cooldown_seconds": 1.0,
+      "action_lock_seconds": 0.8,
+      "range_meters": 8,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "主力単体攻撃。サイトヴェール状態で攻撃威力＋35%。命中時のみ連携状態消費。",
+      "tags": [
+        "damage",
+        "magic",
+        "consume:SIGHT_VEIL"
+      ],
+      "combat_role": "main",
+      "repeat_input_allowed": true
+    },
+    {
+      "id": "B_MAG_02",
+      "type": "magic",
+      "name": "ヒール",
+      "required_tm_level": 5,
+      "prerequisite": [],
+      "tm_point_category": "support",
+      "level10_effect": "25＋0.60×N_MA のHP回復",
+      "mp_cost_at_level10": 12,
+      "cooldown_seconds": 4.0,
+      "action_lock_seconds": 0.7,
+      "range_meters": 8,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "単体回復。回復時に会心・±2%乱数は適用しない。",
+      "tags": [
+        "heal"
+      ],
+      "combat_role": "healing",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_MAG_03",
+      "type": "magic",
+      "name": "ルーンエッジ",
+      "required_tm_level": 10,
+      "prerequisite": [
+        [
+          [
+            "B_MAG_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_MAG_02",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "attack",
+      "level10_effect": "近接命中時0.20×min(N_MA,AP)の魔法追撃",
+      "mp_cost_at_level10": 12,
+      "cooldown_seconds": 10.0,
+      "action_lock_seconds": 0.45,
+      "range_meters": 0,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 90,
+      "weapon_element_share": 0,
+      "notes": "自己バフ90秒。常時値Pを参照し、追撃ごとMP2を追加消費、追撃から追加発動なし。",
+      "tags": [
+        "buff",
+        "on_hit"
+      ],
+      "combat_role": "buff",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_MAG_04",
+      "type": "magic",
+      "name": "スペルオービット",
+      "required_tm_level": 20,
+      "prerequisite": [
+        [
+          [
+            "B_MAG_01",
+            5
+          ]
+        ]
+      ],
+      "tm_point_category": "attack",
+      "level10_effect": "中心対象2.75×N_MA、周辺最大2体へ各1.05×N_MA",
+      "mp_cost_at_level10": 21,
+      "cooldown_seconds": 2.8,
+      "action_lock_seconds": 1.0,
+      "range_meters": 8,
+      "hit_count": 1,
+      "max_targets": 3,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "中心ターゲットを指定して発動。周囲は巻き込みのみ。単体でも高威力、範囲対象には分散威力。対象ごとに命中判定。",
+      "tags": [
+        "damage",
+        "magic",
+        "aoe",
+        "single_target_secondary"
+      ],
+      "combat_role": "secondary_aoe",
+      "target_damage_coefficients": {
+        "primary": 2.75,
+        "secondary": 1.05,
+        "max_secondary": 2
+      },
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_MAG_05",
+      "type": "magic",
+      "name": "サイトヴェール",
+      "required_tm_level": 30,
+      "prerequisite": [
+        [
+          [
+            "B_MAG_01",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "敵AC−12、10秒",
+      "mp_cost_at_level10": 13,
+      "cooldown_seconds": 7.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 8,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 10,
+      "weapon_element_share": 0,
+      "notes": "敵に命中で命中低下とサイトヴェール連携印を付与。ルーンスパークで消費。ボスは低下量半減、印の有効性は維持。",
+      "tags": [
+        "debuff",
+        "status:SIGHT_VEIL"
+      ],
+      "combat_role": "setup",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_MAG_06",
+      "type": "magic",
+      "name": "マナレゾナンス",
+      "required_tm_level": 40,
+      "prerequisite": [
+        [
+          [
+            "B_MAG_01",
+            5
+          ]
+        ],
+        [
+          [
+            "B_MAG_02",
+            5
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "MA＋10%、MP消費−8%",
+      "mp_cost_at_level10": 20,
+      "cooldown_seconds": 10.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 0,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 90,
+      "weapon_element_share": 0,
+      "notes": "90秒自己バフ。消費MPの値引きは他の補正と合算後に最後切り上げ。",
+      "tags": [
+        "buff"
+      ],
+      "combat_role": "buff",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_SEN_01",
+      "type": "sense",
+      "name": "センスニードル",
+      "required_tm_level": 1,
+      "prerequisite": [],
+      "tm_point_category": "attack",
+      "level10_effect": "1.85×N_DA の感知依存単体投射",
+      "mp_cost_at_level10": 8,
+      "cooldown_seconds": 1.0,
+      "action_lock_seconds": 0.75,
+      "range_meters": 7,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "感知型の主力。アンカーネット状態では威力＋30%。命中時だけ連携印を消費。",
+      "tags": [
+        "damage",
+        "physical",
+        "consume:ANCHORED"
+      ],
+      "combat_role": "main",
+      "repeat_input_allowed": true
+    },
+    {
+      "id": "B_SEN_02",
+      "type": "sense",
+      "name": "エイムバレット",
+      "required_tm_level": 1,
+      "prerequisite": [],
+      "tm_point_category": "attack",
+      "level10_effect": "1.85×(Wgun＋N_AC)の単体銃撃",
+      "mp_cost_at_level10": 9,
+      "cooldown_seconds": 1.1,
+      "action_lock_seconds": 0.85,
+      "range_meters": 10,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "銃型の主力。銃必須。命中はLK対LK、銃軽減は相手HV。",
+      "tags": [
+        "damage",
+        "gun"
+      ],
+      "combat_role": "main",
+      "repeat_input_allowed": true
+    },
+    {
+      "id": "B_SEN_03",
+      "type": "sense",
+      "name": "エコートレース",
+      "required_tm_level": 5,
+      "prerequisite": [],
+      "tm_point_category": "support",
+      "level10_effect": "埋蔵反応の調査。Lv10半径2m",
+      "mp_cost_at_level10": 8,
+      "cooldown_seconds": 5.0,
+      "action_lock_seconds": 1.0,
+      "range_meters": 7,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "探索専用。戦闘CT短縮の対象外。",
+      "tags": [
+        "exploration"
+      ],
+      "combat_role": "exploration",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_SEN_04",
+      "type": "sense",
+      "name": "センサーチューン",
+      "required_tm_level": 10,
+      "prerequisite": [
+        [
+          [
+            "B_SEN_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_SEN_02",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "DA＋4、LK＋4",
+      "mp_cost_at_level10": 12,
+      "cooldown_seconds": 10.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 0,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 90,
+      "weapon_element_share": 0,
+      "notes": "自己バフ90秒。",
+      "tags": [
+        "buff"
+      ],
+      "combat_role": "buff",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_SEN_05",
+      "type": "sense",
+      "name": "アンカーネット",
+      "required_tm_level": 25,
+      "prerequisite": [
+        [
+          [
+            "B_SEN_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_SEN_03",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "主対象2.45×N_DA、追加1体0.75×N_DA、最大2体に移動速度−30%",
+      "mp_cost_at_level10": 17,
+      "cooldown_seconds": 2.9,
+      "action_lock_seconds": 0.95,
+      "range_meters": 7,
+      "hit_count": 1,
+      "max_targets": 2,
+      "duration_seconds": 8,
+      "weapon_element_share": 0,
+      "notes": "対象付近へ投射設置。0.25秒後に起動、最長6秒待機、同時1基。主対象2.45倍、追加1体0.75倍。命中対象へ8秒の減速と連携印。",
+      "tags": [
+        "trap",
+        "damage",
+        "debuff",
+        "status:ANCHORED",
+        "single_target_secondary",
+        "delayed_hit"
+      ],
+      "combat_role": "secondary_trap",
+      "effect_timing": {
+        "arming_delay_seconds": 0.25,
+        "trap_lifetime_seconds": 6,
+        "max_simultaneous": 1
+      },
+      "target_damage_coefficients": {
+        "primary": 2.45,
+        "secondary": 0.75,
+        "max_secondary": 1
+      },
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_SEN_06",
+      "type": "sense",
+      "name": "レールスプリット",
+      "required_tm_level": 40,
+      "prerequisite": [
+        [
+          [
+            "B_SEN_02",
+            5
+          ]
+        ]
+      ],
+      "tm_point_category": "attack",
+      "level10_effect": "中心対象2.70×(Wgun＋N_AC)、貫通最大2体に各1.05×(Wgun＋N_AC)",
+      "mp_cost_at_level10": 20,
+      "cooldown_seconds": 2.7,
+      "action_lock_seconds": 1.0,
+      "range_meters": 10,
+      "hit_count": 1,
+      "max_targets": 3,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "銃必須。主対象高威力＋直線上の後続を貫通。対象ごとに命中判定。",
+      "tags": [
+        "damage",
+        "gun",
+        "aoe",
+        "secondary_attack"
+      ],
+      "combat_role": "secondary_aoe",
+      "target_damage_coefficients": {
+        "primary": 2.7,
+        "secondary": 1.05,
+        "max_secondary": 2
+      },
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_CHA_01",
+      "type": "charm",
+      "name": "スウェイナックル",
+      "required_tm_level": 1,
+      "prerequisite": [],
+      "tm_point_category": "attack",
+      "level10_effect": "0.90×AP＋0.80×N_HV の単体近接攻撃",
+      "mp_cost_at_level10": 8,
+      "cooldown_seconds": 1.0,
+      "action_lock_seconds": 0.8,
+      "range_meters": 1.5,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "魅力型の主力。APとHVの投資に応じて威力が変化。",
+      "tags": [
+        "damage",
+        "hybrid"
+      ],
+      "combat_role": "main",
+      "repeat_input_allowed": true
+    },
+    {
+      "id": "B_CHA_02",
+      "type": "charm",
+      "name": "ダンスフロウ",
+      "required_tm_level": 5,
+      "prerequisite": [],
+      "tm_point_category": "support",
+      "level10_effect": "HV＋4",
+      "mp_cost_at_level10": 10,
+      "cooldown_seconds": 10.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 0,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 90,
+      "weapon_element_share": 0,
+      "notes": "自己バフ90秒。",
+      "tags": [
+        "buff"
+      ],
+      "combat_role": "buff",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_CHA_03",
+      "type": "charm",
+      "name": "ブラッドパルス",
+      "required_tm_level": 10,
+      "prerequisite": [],
+      "tm_point_category": "attack",
+      "level10_effect": "2.50×N_現在HP、常時最大HP3%消費",
+      "mp_cost_at_level10": 12,
+      "cooldown_seconds": 2.8,
+      "action_lock_seconds": 0.95,
+      "range_meters": 3,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "HP依存の強打。残HP参照で攻撃値をスナップショット後にHPを支払う。長押し自動連打不可、HP1未満なら発動不可。",
+      "tags": [
+        "damage",
+        "hp_scaling",
+        "secondary_attack"
+      ],
+      "combat_role": "secondary_hp",
+      "hp_cost_fraction_of_permanent_max": 0.03,
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_CHA_04",
+      "type": "charm",
+      "name": "プロテクトレイヤー",
+      "required_tm_level": 20,
+      "prerequisite": [
+        [
+          [
+            "B_CHA_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_CHA_02",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "DP＋20%、MD＋10%",
+      "mp_cost_at_level10": 18,
+      "cooldown_seconds": 10.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 0,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 90,
+      "weapon_element_share": 0,
+      "notes": "自己バフ90秒。",
+      "tags": [
+        "buff"
+      ],
+      "combat_role": "buff",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_CHA_05",
+      "type": "charm",
+      "name": "フェイクプレイ",
+      "required_tm_level": 30,
+      "prerequisite": [
+        [
+          [
+            "B_CHA_01",
+            3
+          ]
+        ],
+        [
+          [
+            "B_CHA_02",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "support",
+      "level10_effect": "敵AC−12、10秒",
+      "mp_cost_at_level10": 13,
+      "cooldown_seconds": 7.0,
+      "action_lock_seconds": 0.5,
+      "range_meters": 5,
+      "hit_count": 0,
+      "max_targets": 1,
+      "duration_seconds": 10,
+      "weapon_element_share": 0,
+      "notes": "敵命中低下＋フェイク連携印。ボスでは低下量半減。印は対応する攻撃が命中した場合のみ消費。",
+      "tags": [
+        "debuff",
+        "status:FAKE_PLAY"
+      ],
+      "combat_role": "setup",
+      "repeat_input_allowed": false
+    },
+    {
+      "id": "B_CHA_06",
+      "type": "charm",
+      "name": "スウェイリポスト",
+      "required_tm_level": 40,
+      "prerequisite": [
+        [
+          [
+            "B_CHA_01",
+            5
+          ],
+          [
+            "B_CHA_05",
+            3
+          ]
+        ]
+      ],
+      "tm_point_category": "finisher",
+      "level10_effect": "通常2.70×N_HV／フェイク状態3.65×N_HV",
+      "mp_cost_at_level10": 20,
+      "cooldown_seconds": 2.7,
+      "action_lock_seconds": 0.95,
+      "range_meters": 1.5,
+      "hit_count": 1,
+      "max_targets": 1,
+      "duration_seconds": 0,
+      "weapon_element_share": 0,
+      "notes": "回避力型の強めの第二技。フェイク状態を命中時に消費。",
+      "tags": [
+        "damage",
+        "combo",
+        "consume:FAKE_PLAY",
+        "secondary_attack"
+      ],
+      "combat_role": "conditional_secondary",
+      "repeat_input_allowed": false
+    }
+  ],
+  "tm50_builds_and_validation": {
+    "attack": {
+      "tm50_points_spent": 41,
+      "unspent": 9,
+      "levels": {
+        "B_ATK_02": 10,
+        "B_ATK_03": 10,
+        "B_ATK_05": 3,
+        "B_ATK_06": 10,
+        "B_ATK_04": 5
+      }
+    },
+    "magic": {
+      "tm50_points_spent": 44,
+      "unspent": 6,
+      "levels": {
+        "B_MAG_01": 10,
+        "B_MAG_02": 6,
+        "B_MAG_03": 5,
+        "B_MAG_04": 10,
+        "B_MAG_06": 10
+      }
+    },
+    "sense": {
+      "tm50_points_spent": 43,
+      "unspent": 7,
+      "levels": {
+        "B_SEN_02": 10,
+        "B_SEN_01": 5,
+        "B_SEN_04": 10,
+        "B_SEN_06": 10,
+        "B_SEN_03": 5
+      }
+    },
+    "charm": {
+      "tm50_points_spent": 42,
+      "unspent": 8,
+      "levels": {
+        "B_CHA_01": 10,
+        "B_CHA_02": 10,
+        "B_CHA_03": 5,
+        "B_CHA_05": 3,
+        "B_CHA_06": 10
+      }
+    }
+  },
+  "formula_example": {
+    "level_scale": "0.6+0.4*(level-1)/9",
+    "master_scale": 1.1,
+    "total_skill_damage": "defense_and_element(base_effect * level_scale) then split by hits then multiply each hit by crit and uniform(0.98,1.02), floor per hit"
+  },
+  "design_targets": {
+    "main_skill_cooldown_seconds": [
+      0.8,
+      1.2
+    ],
+    "secondary_attack_cooldown_seconds": [
+      2.0,
+      3.0
+    ],
+    "main_skill_action_lock_seconds": [
+      0.75,
+      0.85
+    ],
+    "regular_hunt_skill_actions": "戦闘中に主に使う2攻撃＋維持型バフ1種。追加コンボは強敵用。",
+    "main_skill_repeatability": "独立CTと行動ロックを分離し、主力1.0秒前後の連打を妨げない。",
+    "early_goal": "Base20前後の標準狩り場は主力攻撃の二確を第一目標。",
+    "skill_role_difference": "第二攻撃は主力より単発威力が高く、CTとMPも重め。範囲/デバフは例外として性能軸を分ける。"
+  },
+  "validation": {
+    "skill_count": 24,
+    "tm50_examples": {
+      "attack": {
+        "used": 41,
+        "remaining": 9,
+        "prerequisites_valid": true
+      },
+      "magic": {
+        "used": 44,
+        "remaining": 6,
+        "prerequisites_valid": true
+      },
+      "sense": {
+        "used": 43,
+        "remaining": 7,
+        "prerequisites_valid": true
+      },
+      "charm": {
+        "used": 42,
+        "remaining": 8,
+        "prerequisites_valid": true
+      }
+    },
+    "cycles": false,
+    "rotation_30s_ideal_no_travel": {
+      "attack": {
+        "casts": 34,
+        "main_casts": 22,
+        "secondary_casts": 12,
+        "mp_cost_no_buffs": 356,
+        "sample_cast_times": [
+          [
+            0.0,
+            "B_ATK_02"
+          ],
+          [
+            0.95,
+            "B_ATK_01"
+          ],
+          [
+            1.95,
+            "B_ATK_01"
+          ],
+          [
+            2.7,
+            "B_ATK_02"
+          ],
+          [
+            3.65,
+            "B_ATK_01"
+          ],
+          [
+            4.65,
+            "B_ATK_01"
+          ],
+          [
+            5.4,
+            "B_ATK_02"
+          ],
+          [
+            6.35,
+            "B_ATK_01"
+          ],
+          [
+            7.35,
+            "B_ATK_01"
+          ]
+        ]
+      },
+      "magic": {
+        "casts": 32,
+        "main_casts": 21,
+        "secondary_casts": 11,
+        "mp_cost_no_buffs": 420,
+        "sample_cast_times": [
+          [
+            0.0,
+            "B_MAG_04"
+          ],
+          [
+            1.0,
+            "B_MAG_01"
+          ],
+          [
+            2.0,
+            "B_MAG_01"
+          ],
+          [
+            2.8,
+            "B_MAG_04"
+          ],
+          [
+            3.8,
+            "B_MAG_01"
+          ],
+          [
+            4.8,
+            "B_MAG_01"
+          ],
+          [
+            5.6,
+            "B_MAG_04"
+          ],
+          [
+            6.6,
+            "B_MAG_01"
+          ],
+          [
+            7.6,
+            "B_MAG_01"
+          ]
+        ]
+      },
+      "sense_gun": {
+        "casts": 31,
+        "main_casts": 20,
+        "secondary_casts": 11,
+        "mp_cost_no_buffs": 400,
+        "sample_cast_times": [
+          [
+            0.0,
+            "B_SEN_06"
+          ],
+          [
+            1.0,
+            "B_SEN_02"
+          ],
+          [
+            2.1,
+            "B_SEN_02"
+          ],
+          [
+            2.95,
+            "B_SEN_06"
+          ],
+          [
+            3.95,
+            "B_SEN_02"
+          ],
+          [
+            5.05,
+            "B_SEN_02"
+          ],
+          [
+            5.9,
+            "B_SEN_06"
+          ],
+          [
+            6.9,
+            "B_SEN_02"
+          ],
+          [
+            8.0,
+            "B_SEN_02"
+          ]
+        ]
+      },
+      "sense_detection": {
+        "casts": 32,
+        "main_casts": 21,
+        "secondary_casts": 11,
+        "mp_cost_no_buffs": 355,
+        "sample_cast_times": [
+          [
+            0.0,
+            "B_SEN_05"
+          ],
+          [
+            0.95,
+            "B_SEN_01"
+          ],
+          [
+            1.95,
+            "B_SEN_01"
+          ],
+          [
+            2.9,
+            "B_SEN_05"
+          ],
+          [
+            3.85,
+            "B_SEN_01"
+          ],
+          [
+            4.85,
+            "B_SEN_01"
+          ],
+          [
+            5.8,
+            "B_SEN_05"
+          ],
+          [
+            6.75,
+            "B_SEN_01"
+          ],
+          [
+            7.75,
+            "B_SEN_01"
+          ]
+        ]
+      },
+      "charm_hv": {
+        "casts": 33,
+        "main_casts": 22,
+        "secondary_casts": 11,
+        "mp_cost_no_buffs": 396,
+        "sample_cast_times": [
+          [
+            0.0,
+            "B_CHA_06"
+          ],
+          [
+            0.95,
+            "B_CHA_01"
+          ],
+          [
+            1.95,
+            "B_CHA_01"
+          ],
+          [
+            2.75,
+            "B_CHA_06"
+          ],
+          [
+            3.7,
+            "B_CHA_01"
+          ],
+          [
+            4.7,
+            "B_CHA_01"
+          ],
+          [
+            5.5,
+            "B_CHA_06"
+          ],
+          [
+            6.45,
+            "B_CHA_01"
+          ],
+          [
+            7.45,
+            "B_CHA_01"
+          ]
+        ]
+      },
+      "charm_hp": {
+        "casts": 33,
+        "main_casts": 22,
+        "secondary_casts": 11,
+        "mp_cost_no_buffs": 308,
+        "sample_cast_times": [
+          [
+            0.0,
+            "B_CHA_03"
+          ],
+          [
+            0.95,
+            "B_CHA_01"
+          ],
+          [
+            1.95,
+            "B_CHA_01"
+          ],
+          [
+            2.8,
+            "B_CHA_03"
+          ],
+          [
+            3.75,
+            "B_CHA_01"
+          ],
+          [
+            4.75,
+            "B_CHA_01"
+          ],
+          [
+            5.6,
+            "B_CHA_03"
+          ],
+          [
+            6.55,
+            "B_CHA_01"
+          ],
+          [
+            7.55,
+            "B_CHA_01"
+          ]
+        ]
+      }
+    },
+    "notes": "理想条件。CTと行動時間だけから求めた回数であり、敵死亡によるターゲット切替、射程、スキル習得可能時期、MP/HP不足、回復、移動は未加味。"
+  }
+}

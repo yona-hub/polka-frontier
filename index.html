@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POLKA FRONTIER — 3D Map Proof of Concept</title>
+<link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="header"><div class="brand"><div class="mark">P<span>F</span></div><div><div class="tiny">POLKA FRONTIER / DEVELOPMENT BUILD</div><h1>立体マップ・衝突判定 PoC</h1></div></div><span class="status-badge">LOCAL DEMO · ASSETS PLACEHOLDER</span></header>
+  <main>
+    <section class="viewport" aria-label="3D 検証マップ">
+      <div class="map-label"><span class="dot"></span> <strong>立体地形の検証エリア</strong><small>灰色・仮モデル／正規素材なし</small></div>
+      <canvas id="stage"></canvas><canvas id="overlay"></canvas>
+      <div class="side-legend"><span><i class="swatch high"></i>橋上 y=3m</span><span><i class="swatch low"></i>橋下 y=0m</span><span><i class="swatch danger"></i>通行禁止の穴</span></div>
+      <div class="coordinates" id="status" aria-live="polite">描画準備中…</div>
+    </section>
+    <aside class="sidebar">
+      <div class="panel"><div class="panel-head"><span class="eyebrow">WORLD INTERACTION</span><h2>操作と移動先</h2></div>
+        <p>同じ位置でも <b>地上と橋上は異なる歩行面</b>です。クリックで自動経路探索します。</p>
+        <div class="select-label">目的地の歩行面：<b id="targetSurface">地上</b></div>
+        <div class="button-pair"><button id="modeGround" class="active">地上を指定</button><button id="modeBridge">橋上を指定</button></div>
+        <div class="helper">WASD・矢印キー：手動移動 / Q・E：視点回転 / ホイール：拡大縮小 / Esc：停止</div>
+      </div>
+      <div class="panel"><div class="panel-head"><span class="eyebrow">AUTOMATED SCENARIOS</span><h2>立体地形を試す</h2></div>
+        <button id="routeBridge" class="scenario"><span>01</span><span>橋の上へ上がる<small>階段経由で高さ3mへ</small></span><b>→</b></button>
+        <button id="routeUnder" class="scenario"><span>02</span><span>橋の下を通り抜ける<small>上層へ誤移動しない</small></span><b>→</b></button>
+        <button id="routeHole" class="scenario"><span>03</span><span>穴を避けて歩く<small>通行不可領域を回避</small></span><b>→</b></button>
+        <button id="routeStairs" class="scenario"><span>04</span><span>開始地点へ帰還<small>橋上からの下降も検証</small></span><b>→</b></button>
+      </div>
+      <div class="panel"><div class="panel-head"><span class="eyebrow">COLLISION OPTIONS</span><h2>状態変化の検証</h2></div>
+        <div class="button-stack"><button id="crateToggle">木箱を撤去</button><button id="speedToggle">移動速度：通常</button><button id="reset">開始地点に戻す</button></div>
+        <p class="note">木箱を撤去すると当たり判定と経路グラフを再生成。+40%高速移動でも同じ判定を使います。</p>
+      </div>
+    </aside>
+  </main>
+  <footer><div id="messages" role="status"></div><div>Local-only 3D geometry · Node test suite · No authentication or MMO networking yet</div></footer>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body></html>
