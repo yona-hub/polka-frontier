@@ -4,7 +4,7 @@
 
 ## 起動
 
-必要: Node.js 20以上（テスト用）、Python 3（静的サーバー用）または任意のローカルHTTPサーバー。
+必要: **Node.js 20以上**。追加の npm install や Python は不要です。
 
 ```bash
 npm test
